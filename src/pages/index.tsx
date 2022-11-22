@@ -1,49 +1,31 @@
 import { Button, Card, Container, Figure, Form, Nav } from "react-bootstrap";
 
-import { useQuery } from "@tanstack/react-query";
-import api from "service/api";
-import { useState } from "react";
 import { Star } from "phosphor-react";
 import formatDate from "utils/formatDate";
-
-type UserProps = {
-	login: string;
-	avatar_url: string;
-	location: string;
-	html_url: string;
-};
-
-type RepoProps = {
-	name: string;
-	html_url: string;
-	stargazers_count: number;
-	created_at: string;
-};
+import useUser from "hooks/user/useUser";
+import { FormEvent, useState } from "react";
 
 const Home = () => {
-	const { data: user, isFetching: isFetchingUser } = useQuery<UserProps>(
-		["user"],
-		async () => {
-			const response = await api.get("/users/CarolinePandolfe");
+	const [search, setSearch] = useState("");
 
-			return response.data;
-		}
-	);
+	const { userData, reposData, refetch, isFetching } = useUser(search);
 
-	const { data, isFetching } = useQuery<RepoProps[]>(["repos"], async () => {
-		const response = await api.get(
-			"/users/CarolinePandolfe/repos?sort=created"
-		);
-
-		return response.data;
-	});
+	const handleSubmit = (event: FormEvent) => {
+		event.preventDefault();
+		refetch();
+	};
 
 	return (
 		<Container>
-			<Form>
+			<Form onSubmit={handleSubmit}>
 				<Form.Group className="mb-3">
 					<Form.Label>Digite o nome do usuário</Form.Label>
-					<Form.Control type="text" placeholder="Usuário" />
+					<Form.Control
+						type="text"
+						placeholder="Usuário"
+						onChange={(e) => setSearch(e.target.value)}
+						value={search}
+					/>
 				</Form.Group>
 				<Button>Buscar</Button>
 			</Form>
@@ -52,23 +34,23 @@ const Home = () => {
 				<Nav.Item className="d-flex">
 					<Figure>
 						<Figure.Image
-							alt={`Imagem de ${user?.login}`}
-							src={user?.avatar_url}
+							alt={`Imagem de ${userData?.login}`}
+							src={userData?.avatar_url}
 							roundedCircle
 						/>
 					</Figure>
-					<Nav.Link href={user?.html_url} target="_blank">
-						{user?.login}
+					<Nav.Link href={userData?.html_url} target="_blank">
+						{userData?.login}
 					</Nav.Link>
 				</Nav.Item>
 
 				<Nav.Item>
-					<Nav.Link>{user?.location}</Nav.Link>
+					<Nav.Link>{userData?.location}</Nav.Link>
 				</Nav.Item>
 			</Nav>
 
-			{data?.map((repo) => (
-				<Card>
+			{reposData?.map((repo) => (
+				<Card key={repo.name}>
 					<Card.Body>
 						<Card.Title>{repo?.name}</Card.Title>
 						<Card.Subtitle className="mb-2 d-flex align-items-end gap-2">
