@@ -9,7 +9,7 @@ type UserProps = {
 	html_url: string;
 };
 
-type RepoProps = {
+export type RepoProps = {
 	name: string;
 	html_url: string;
 	stargazers_count: number;
