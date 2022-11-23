@@ -1,5 +1,6 @@
 import { useQueries } from "@tanstack/react-query";
 import { Octokit } from "octokit";
+import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 
 type UserProps = {
 	login: string;
@@ -20,19 +21,24 @@ type UserPropsReturn = {
 	reposData: RepoProps[];
 	refetch: () => void;
 	isFetching: boolean;
+	search: string;
+	setSearch: Dispatch<SetStateAction<string>>;
+	handleSubmit: (event: FormEvent) => void;
 };
 
 const octokit = new Octokit({
 	auth: "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",
 });
 
-const useUser = (login: string): UserPropsReturn => {
+const useUser = (): UserPropsReturn => {
+	const [search, setSearch] = useState("");
+
 	const [user, repos] = useQueries({
 		queries: [
 			{
 				queryKey: ["user"],
 				queryFn: async () => {
-					const response = await octokit.request(`GET /users/${login}`);
+					const response = await octokit.request(`GET /users/${search}`);
 					return response.data;
 				},
 			},
@@ -40,7 +46,7 @@ const useUser = (login: string): UserPropsReturn => {
 				queryKey: ["repos"],
 				queryFn: async () => {
 					const response = await octokit.request(
-						`GET /users/${login}/repos?sort=created`
+						`GET /users/${search}/repos?sort=created`
 					);
 					return response.data;
 				},
@@ -53,9 +59,22 @@ const useUser = (login: string): UserPropsReturn => {
 		repos.refetch();
 	};
 
+	const handleSubmit = (event: FormEvent) => {
+		event.preventDefault();
+		refetch();
+	};
+
 	const isFetching = user.isFetching || repos.isFetching;
 
-	return { userData: user.data, reposData: repos.data, refetch, isFetching };
+	return {
+		userData: user.data,
+		reposData: repos.data,
+		refetch,
+		isFetching,
+		search,
+		setSearch,
+		handleSubmit,
+	};
 };
 
 export default useUser;

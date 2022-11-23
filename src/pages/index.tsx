@@ -1,44 +1,17 @@
-import {
-	Button,
-	Card,
-	Container,
-	Figure,
-	Form,
-	Nav,
-	Spinner,
-	Row,
-} from "react-bootstrap";
+import { Card, Container, Figure, Nav, Spinner, Row } from "react-bootstrap";
 
 import { Star } from "phosphor-react";
 import formatDate from "utils/formatDate";
 import useUser from "hooks/user/useUser";
-import { FormEvent, useState } from "react";
+import FormComponent from "components/Form";
 
 const Home = () => {
-	const [search, setSearch] = useState("");
-
-	const { userData, reposData, refetch, isFetching } = useUser(search);
-
-	const handleSubmit = (event: FormEvent) => {
-		event.preventDefault();
-		refetch();
-	};
+	const { userData, reposData, isFetching } = useUser();
 
 	return (
 		<Container>
 			<>
-				<Form onSubmit={handleSubmit}>
-					<Form.Group className="mb-3">
-						<Form.Label>Digite o nome do usuário</Form.Label>
-						<Form.Control
-							type="text"
-							placeholder="Usuário"
-							onChange={(e) => setSearch(e.target.value)}
-							value={search}
-						/>
-					</Form.Group>
-					<Button>Buscar</Button>
-				</Form>
+				<FormComponent />
 
 				{isFetching && (
 					<Row className="justify-content-center">
